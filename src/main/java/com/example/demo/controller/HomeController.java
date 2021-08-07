@@ -14,9 +14,9 @@ public class HomeController {
     private final String ENCODED_HOLIDAY_CALENDAR_ID = "ko.south_korea%23holiday%40group.v.calendar.google.com";
     private final String ENCODED_BIRTHDAY_CALENDAR_ID = "addressbook%23contacts%40group.v.calendar.google.com";
 
-    @GetMapping("/goocal")
-    public String goocal(Model model){
-        return "goocal";
+    @GetMapping("/home")
+    public String home(Model model){
+        return "home";
     }
 
     @GetMapping("/receiveAC")
