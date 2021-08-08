@@ -1,31 +1,37 @@
 package com.example.demo.service;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
-import java.util.HashMap;
-import java.util.Map;
+import org.springframework.web.util.UriComponentsBuilder;
 
 
 public class RestJsonService {
-    private final String CLIENT_ID = "499264841555-1kqekv3g1khc8jn5848cn1i8pcp12t29.apps.googleusercontent.com";
-    private final String CLIENT_SECRET= "415QTIStyKwYdnz_Yk0ES6Xz";
-    private final String REDIRECT_URI= "http://localhost:8080/receiveAC";
     private final String GRANT_TYPE= "authorization_code";
-    private final String TOKEN_URL = "https://oauth2.googleapis.com/token";
+    private final String CLIENT_ID = "50ca5e8cf40713abcab868ed9ed3047d";
+    private final String REDIRECT_URI= "http://kimcoder.kro.kr:8080/receiveAC";
+    private final String CLIENT_SECRET= "6hTKHMv...생략";
+    private final String TOKEN_URL = "https://kauth.kakao.com/oauth/token";
 
     public String getAccessTokenJsonData(String code){
         RestTemplate restTemplate = new RestTemplate();
 
-        Map<String, Object> params = new HashMap<>();
-        params.put("code", code);
-        params.put("client_id", CLIENT_ID);
-        params.put("client_secret", CLIENT_SECRET);
-        params.put("redirect_uri", REDIRECT_URI);
-        params.put("grant_type", GRANT_TYPE);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        HttpEntity request = new HttpEntity(headers);
 
-        ResponseEntity<String> responseEntity =
-                restTemplate.postForEntity(TOKEN_URL, params, String.class);
+        UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromHttpUrl(TOKEN_URL)
+                .queryParam("grant_type", GRANT_TYPE)
+                .queryParam("client_id", CLIENT_ID)
+                .queryParam("redirect_uri", REDIRECT_URI)
+                .queryParam("code", code)
+                .queryParam("client_secret", CLIENT_SECRET);
+
+        ResponseEntity<String> responseEntity = restTemplate.exchange(
+                uriComponentsBuilder.toUriString(),
+                HttpMethod.POST,
+                request,
+                String.class
+        );
 
         if (responseEntity.getStatusCode() == HttpStatus.OK) {
             return responseEntity.getBody();

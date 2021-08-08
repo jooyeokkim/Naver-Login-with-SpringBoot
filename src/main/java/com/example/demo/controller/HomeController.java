@@ -1,7 +1,6 @@
 package com.example.demo.controller;
 
-import com.example.demo.service.CalendarListService;
-import com.example.demo.service.EventListService;
+import com.example.demo.service.GetUserInfoService;
 import com.example.demo.service.RestJsonService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -11,8 +10,6 @@ import org.json.JSONObject;
 
 @Controller
 public class HomeController {
-    private final String ENCODED_HOLIDAY_CALENDAR_ID = "ko.south_korea%23holiday%40group.v.calendar.google.com";
-    private final String ENCODED_BIRTHDAY_CALENDAR_ID = "addressbook%23contacts%40group.v.calendar.google.com";
 
     @GetMapping("/home")
     public String home(Model model){
@@ -20,38 +17,32 @@ public class HomeController {
     }
 
     @GetMapping("/receiveAC")
-    public String receiveAC(@RequestParam("code") String code, Model model){
+    public String receiveAC(@RequestParam("code") String code, Model model) {
         RestJsonService restJsonService = new RestJsonService();
+
+        //access_token이 포함된 JSON String을 받아온다.
         String accessTokenJsonData = restJsonService.getAccessTokenJsonData(code);
+        if(accessTokenJsonData=="error") return "error";
 
-        JSONObject accessTokenjsonObject = new JSONObject(accessTokenJsonData);
+        //JSON String -> JSON Object
+        JSONObject accessTokenJsonObject = new JSONObject(accessTokenJsonData);
 
-        String accessToken = accessTokenjsonObject.get("access_token").toString();
-        System.out.println(accessToken);
-
-        // Get CalendarList
-        CalendarListService calendarListService = new CalendarListService();
-        String calendarListJsonData = calendarListService.getCalendarList(accessToken);
-        if(calendarListJsonData=="error") return "error";
-        else System.out.println("CalendarList Json Data : " + calendarListJsonData);
+        //access_token 추출
+        String accessToken = accessTokenJsonObject.get("access_token").toString();
 
 
-        // Get EventList
-        // Get Primary Calendar
-        EventListService eventListService = new EventListService();
-        String userJsonData = eventListService.getMyCalendar(accessToken, "primary");
-        if(userJsonData=="error") return "error";
-        else System.out.println("User Json Data : " + userJsonData);
+        //유저 정보가 포함된 JSON String을 받아온다.
+        GetUserInfoService getUserInfoService = new GetUserInfoService();
+        String userInfo = getUserInfoService.getUserInfo(accessToken);
 
-        // Get Holiday Calendar
-        String holidayJsonData = eventListService.getMyCalendar(accessToken, ENCODED_HOLIDAY_CALENDAR_ID);
-        if(holidayJsonData=="error") return "error";
-        else System.out.println("Holiday Json Data : " + holidayJsonData);
+        //JSON String -> JSON Object
+        JSONObject userInfoJsonObject = new JSONObject(userInfo);
 
-        // Get birthday Calendar
-        String birthdayJsonData = eventListService.getMyCalendar(accessToken, ENCODED_BIRTHDAY_CALENDAR_ID);
-        if(calendarListJsonData=="error") return "error";
-        else System.out.println("Birthday Json Data : " + birthdayJsonData);
+        //유저의 Email 추출
+        JSONObject kakaoAccountJsonObject = (JSONObject)userInfoJsonObject.get("kakao_account");
+        String email = kakaoAccountJsonObject.get("email").toString();
+
+        model.addAttribute("email", email);
 
         return "success";
     }
