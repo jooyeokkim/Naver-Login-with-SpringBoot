@@ -8,11 +8,28 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.json.JSONObject;
 
+import javax.servlet.http.HttpSession;
+import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
+import java.net.URLEncoder;
+import java.security.SecureRandom;
+
 @Controller
 public class HomeController {
 
     @GetMapping("/home")
-    public String home(Model model){
+    public String home(HttpSession session, Model model) {
+        String state = generateState();
+        String encodedState="";
+        try {
+            encodedState = URLEncoder.encode(state, "UTF-8");
+        } catch (UnsupportedEncodingException e){
+            e.printStackTrace();
+        }
+        session.setAttribute("state", encodedState);
+        session.setMaxInactiveInterval(60*60);
+
+        model.addAttribute("state", encodedState);
         return "home";
     }
 
@@ -39,11 +56,17 @@ public class HomeController {
         JSONObject userInfoJsonObject = new JSONObject(userInfo);
 
         //유저의 Email 추출
-        JSONObject kakaoAccountJsonObject = (JSONObject)userInfoJsonObject.get("kakao_account");
-        String email = kakaoAccountJsonObject.get("email").toString();
+        JSONObject responseJsonObject = (JSONObject)userInfoJsonObject.get("response");
+        String email = responseJsonObject.get("email").toString();
 
         model.addAttribute("email", email);
 
         return "success";
+    }
+
+    public String generateState()
+    {
+        SecureRandom random = new SecureRandom();
+        return new BigInteger(130, random).toString(32);
     }
 }

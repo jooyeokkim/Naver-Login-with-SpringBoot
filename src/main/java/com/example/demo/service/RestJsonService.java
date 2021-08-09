@@ -7,10 +7,10 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 public class RestJsonService {
     private final String GRANT_TYPE= "authorization_code";
-    private final String CLIENT_ID = "50ca5e8cf40713abcab868ed9ed3047d";
+    private final String CLIENT_ID = "dCVGzkXWy9hisbp_qKAV";
     private final String REDIRECT_URI= "http://kimcoder.kro.kr:8080/receiveAC";
-    private final String CLIENT_SECRET= "6hTKHMv...생략";
-    private final String TOKEN_URL = "https://kauth.kakao.com/oauth/token";
+    private final String CLIENT_SECRET= "HoNaf0YK5j";
+    private final String TOKEN_URL = "https://nid.naver.com/oauth2.0/token";
 
     public String getAccessTokenJsonData(String code){
         RestTemplate restTemplate = new RestTemplate();
